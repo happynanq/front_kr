@@ -40,6 +40,7 @@ const layoutStyle = {
 
 const App = () => {
   const {loading} = useApp()
+  
   if(loading){
     return <Spin fullscreen/>
   }
@@ -50,11 +51,11 @@ const App = () => {
     <Layout style={layoutStyle}>
      
       <Layout>
-        <Header style={headerStyle}>Header</Header>
+        {/* <Header style={headerStyle}>Header</Header> */}
         <Content style={contentStyle}>
           <FormProduct/>
         </Content>
-        <Footer style={footerStyle}></Footer>
+        {/* <Footer style={footerStyle}></Footer> */}
       </Layout>
     </Layout>
   </>

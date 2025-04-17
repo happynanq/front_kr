@@ -10,10 +10,10 @@ const AppContext = createContext({
 })
 
 export function AppContextProvider({children}){
-  const [loading, setLodaing] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [order, setOrder] = useState({}) // ! тут я храню текущий ордер
   const [asset, setAsset] = useState({}) // ! тут мне надо получит только ассет с сервера от моего запроса(он уже идет от ордера)
-
+  const [modalLoad, setModalLoad] = useState(true)
 
 
   useEffect(()=>{
@@ -38,35 +38,42 @@ export function AppContextProvider({children}){
       return new Promise(res=>{
         setTimeout(()=>{
           res(fakeFetchData)
-        }, 100)
+        }, 4000)
       })
     }
     async function preload() {
+      setLoading(true)
+
       const as = await fakeFetch()
       
       setAsset(as)
+      console.log("ASSET AS ", as)
+      setModalLoad(false)
+      setLoading(false)
+
     }
+
     if(Object.keys(order) != 0){
-      setLodaing(true)
 
       console.log("FETCH ORDER", order)
       preload()
+      console.log("FETCH ORDER 2", order)
+
       // prom()
       //!!! prom()
       
     }
-    setLodaing(false)
   }, [order])
 
   async function sendAndGetOrder(url) {
-    setLodaing(true)
+    setLoading(true)
 
   }
 
 
   
 
-  return <AppContext.Provider value = {{loading, crypto, asset, sendAndGetOrder, setOrder, setLodaing}}>
+  return <AppContext.Provider value = {{loading, crypto, asset, sendAndGetOrder, setOrder, setLoading, modalLoad, setModalLoad}}>
       
       {children}
   </AppContext.Provider>

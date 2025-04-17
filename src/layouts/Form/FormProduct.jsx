@@ -12,7 +12,8 @@ import {
   Row,
   Upload,
   Select,
-  Modal
+  Modal,
+  Typography
 } from "antd";
 import Link from "antd/es/typography/Link";
 import ResponseOrder from "./ResponseOrder";
@@ -53,7 +54,8 @@ const FormProduct = () => {
   const [form] = Form.useForm();
   const [modal, setModal] = useState(false)
   const [fetchRes, setFetchRes] = useState([])
-  const {setOrder, setLodaing} = useApp()
+  const {setOrder, loading, modalLoad, setModalLoad} = useApp()
+  const [modalAgree, setModalAgree] = useState(false)
 
   const onFinish = (values) => {
     console.log("Received values of form: ", values);
@@ -66,34 +68,7 @@ const FormProduct = () => {
     delete ord.dragger
     setOrder(()=>ord)
     setModal(()=>true)
-    setFetchRes({
-      "smeta": 1000000,
-      "drone_model": [
-          {
-              "name": "P10",
-              "cnt": 10,
-              "price_one": 123
-          },
-          {
-              "name": "A32-ultra",
-              "cnt": 2,
-              "price_one": 10000
-          }
-      ],
-      "additional": [
-          {
-              "name": "Расширитель ХХХ",
-              "cnt": 2,
-              "price_one": 100
-          },
-          {
-              "name": "Расширитель бочка",
-              "cnt": 2,
-              "price_one": 100
-          }
-      ],
-      "recommendation": "prompt.prompt"
-    })
+    
 
     async function prom() {
       let url = "http://192.168.1.123:8000/init/router"
@@ -242,7 +217,11 @@ const FormProduct = () => {
         {...tailFormItemLayout}
       >
         <Checkbox>
-          I have read the <Link onClick={()=>console.log("qew")}>agreement</Link>
+        Принимаю условия  
+          <Button color="primary" variant="link" onClick = {()=>{setModalAgree(true)}}>
+          Соглашения
+          </Button>
+          на обработку персональных данных 
         </Checkbox>
       </Form.Item>
 
@@ -267,8 +246,32 @@ const FormProduct = () => {
       </Form>
     </div>
 
-    <Modal open={modal} onCancel={() => setModal(false)} footer={null}>
+    <Modal open={!modalLoad} onCancel={() => setModalLoad(true)} footer={null}>
       <ResponseOrder fetchRes = {fetchRes} setModal={setModal} />
+      </Modal >
+
+      <Modal open={modalAgree} onCancel={() => setModalAgree(false)} footer={null}>
+      <Typography>
+        <Typography.Text>Настоящим в соответствии с Федеральным законом № 152-ФЗ «О персональных данных» от 27.07.2006 года Вы подтверждаете свое согласие на обработку ООО НПП «Автономные аэрокосмические системы-ГеоСервис» Ваших персональных данных: сбор, систематизацию, накопление, хранение, уточнение (обновление, изменение), использование, блокирование, обезличивание, уничтожение.</Typography.Text>
+        </Typography>
+        <Typography>
+        <Typography.Text>ООО НПП «Автономные аэрокосмические системы-ГеоСервис», гарантирует конфиденциальность получаемой нами информации. Обработка персональных данных осуществляется в целях эффективной обработки запросов, исполнения заказов, договоров и иных обязательств, принятых нашей компанией в качестве обязательных к исполнению перед Вами.</Typography.Text>
+        </Typography>
+        <Typography>
+        <Typography.Text>Настоящее согласие распространяется на следующие Ваши персональные данные:</Typography.Text>
+        </Typography>
+        <Typography>
+          <ul>
+            <li>фамилия, имя и отчество;</li>
+            <li>адрес электронной почты;</li>
+            <li>контактный телефон;</li>
+            <li>платёжные реквизиты.</li>
+          </ul>
+        </Typography>
+        
+        <Typography>
+        <Typography.Text>Срок действия Вашего согласия является неограниченным, однако, Вы вправе в любой момент отозвать настоящее согласие, путём направления письменного уведомления на адрес: 660079, г. Красноярск, ул. Электриков, 156/1, ООО НПП «АВАКС-ГеоСервис», с пометкой «отзыв согласия на обработку персональных данных». Обращаем Ваше внимание, что отзыв Вашего согласия на обработку персональных данных влечёт за собой уничтожение записей, содержащих Ваши персональные данные, в системах обработки персональных данных ООО НПП «Автономные аэрокосмические системы-ГеоСервис», что может сделать невозможным пользование сервисами нашей компании.</Typography.Text>
+        </Typography>
       </Modal >
 
 
