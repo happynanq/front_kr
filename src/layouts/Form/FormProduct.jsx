@@ -12,43 +12,13 @@ import {
   Row,
   Upload,
   Select,
+  Modal
 } from "antd";
 import Link from "antd/es/typography/Link";
+import ResponseOrder from "./ResponseOrder";
+import { useApp } from "../../context/app-context";
 const { Option } = Select;
-const residences = [
-  {
-    value: "zhejiang",
-    label: "Zhejiang",
-    children: [
-      {
-        value: "hangzhou",
-        label: "Hangzhou",
-        children: [
-          {
-            value: "xihu",
-            label: "West Lake",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: "jiangsu",
-    label: "Jiangsu",
-    children: [
-      {
-        value: "nanjing",
-        label: "Nanjing",
-        children: [
-          {
-            value: "zhonghuamen",
-            label: "Zhong Hua Men",
-          },
-        ],
-      },
-    ],
-  },
-];
+
 const normFile = e => {
   console.log('Upload event:', e);
   if (Array.isArray(e)) {
@@ -81,18 +51,86 @@ const tailFormItemLayout = {
 };
 const FormProduct = () => {
   const [form] = Form.useForm();
+  const [modal, setModal] = useState(false)
+  const [fetchRes, setFetchRes] = useState([])
+  const {setOrder, setLodaing} = useApp()
+
   const onFinish = (values) => {
     console.log("Received values of form: ", values);
+    let ord = {
+      ...values, 
+      file_name:values.dragger.map(e=>e.name), 
+      drag_file: ["bytes", "bytes"] //!!!!
+    }
+    delete ord.agreement
+    delete ord.dragger
+    setOrder(()=>ord)
+    setModal(()=>true)
+    setFetchRes({
+      "smeta": 1000000,
+      "drone_model": [
+          {
+              "name": "P10",
+              "cnt": 10,
+              "price_one": 123
+          },
+          {
+              "name": "A32-ultra",
+              "cnt": 2,
+              "price_one": 10000
+          }
+      ],
+      "additional": [
+          {
+              "name": "Расширитель ХХХ",
+              "cnt": 2,
+              "price_one": 100
+          },
+          {
+              "name": "Расширитель бочка",
+              "cnt": 2,
+              "price_one": 100
+          }
+      ],
+      "recommendation": "prompt.prompt"
+    })
+
+    async function prom() {
+      let url = "http://192.168.1.123:8000/init/router"
+      const bd = {
+        ...values, 
+        file_name:values.dragger.map(e=>e.name), 
+        drag_file: ["bytes", "bytes"] //!!!!
+      }
+      delete bd.agreement
+      delete bd.dragger
+      console.log("str ", JSON.stringify(bd));
+      
+      console.log("BD : ", bd)
+      let res = await fetch(url, {
+        method:"POST", 
+        body:JSON.stringify(bd), 
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((e)=>{
+        async function f() {
+          let x = await e.json()
+          return x
+          
+        }
+        
+        return f()
+        // console.log("res: ", JSON.parse(e))
+      })
+      
+      console.log("RESULT ", res);
+      setFetchRes(res)
+    }
+    // prom()
     // ! FETCH VALUES HERE
   };
-  const prefixSelector = (
-    <Form.Item name="prefix" noStyle>
-      <Select style={{ width: 70 }}>
-        <Option value="+8">+86</Option>
-        <Option value="8">+87</Option>
-      </Select>
-    </Form.Item>
-  );
   const [autoCompleteResult, setAutoCompleteResult] = useState([]);
   const onWebsiteChange = (value) => {
     if (!value) {
@@ -108,22 +146,22 @@ const FormProduct = () => {
     value: website,
   }));
   return (
-    <Form
+    <>
+    <div style={{ height: '100%', overflowY: 'auto' }}>
+      <Form layout="vertical" 
       {...formItemLayout}
       form={form}
       name="register"
       onFinish={onFinish}
-      initialValues={{
-        residence: ["zhejiang", "hangzhou", "xihu"],
-        prefix: "86",
-      }}
-      style={{ maxWidth: 600 }}
-      scrollToFirstError
-    >
+      
+      // layout="vertical"
+      // scrollToFirstError
+      
+      >
       <Form.Item
         name="name"
         label="Имя"
-        rules = {[{required:true, message:"Это поле должно быть заполнено!"}]}
+        // ! rules = {[{required:true, message:"Это поле должно быть заполнено!"}]}
         // tooltip="Ваше имя необходимо для заполнения заявки"
         // rules={[{ required: true, message: 'Please input your nickname!', whitespace: true }]}
       >
@@ -133,25 +171,24 @@ const FormProduct = () => {
       <Form.Item
         name="phone"
         label="Phone Number"
-        rules={[{ required: 
-          true, message: "Please input your phone number!" }]}
-      >
+        // ! rules={[{ required:   true, message: "Please input your phone number!" }]}
+        >
         <Input  style={{ width: "100%" }} />
       </Form.Item>
 
       <Form.Item
         name="email"
         label="E-mail"
-        rules={[
-          {
-            type: "email",
-            message: "The input is not valid E-mail!",
-          },
-          {
-            required: true,
-            message: "Please input your E-mail!",
-          },
-        ]}
+        // rules={[
+        //   {
+        //     type: "email",
+        //     message: "The input is not valid E-mail!",
+        //   },
+        //   {
+        //     required: true,
+        //     message: "Please input your E-mail!",
+        //   },
+        // ]}
       >
         <Input />
       </Form.Item>
@@ -196,7 +233,8 @@ const FormProduct = () => {
         rules={[
           {
             validator: (_, value) =>
-              value
+              // value
+              true
                 ? Promise.resolve()
                 : Promise.reject(new Error("Should accept agreement")),
           },
@@ -223,10 +261,18 @@ const FormProduct = () => {
 
       <Form.Item {...tailFormItemLayout}>
         <Button type="primary" htmlType="submit">
-          Register
+          Отправить заказ
         </Button>
       </Form.Item>
-    </Form>
+      </Form>
+    </div>
+
+    <Modal open={modal} onCancel={() => setModal(false)} footer={null}>
+      <ResponseOrder fetchRes = {fetchRes} setModal={setModal} />
+      </Modal >
+
+
+    </>
   );
 };
 export default FormProduct;

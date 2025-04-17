@@ -1,5 +1,6 @@
-import { Flex, Layout } from 'antd';
+import { Flex, Layout, Spin } from 'antd';
 import FormProduct from './layouts/Form/FormProduct';
+import { useApp } from './context/app-context';
 const { Header, Footer, Sider, Content } = Layout;
 const headerStyle = {
   textAlign: 'center',
@@ -37,14 +38,17 @@ const layoutStyle = {
 };
 
 
-const App = () => (
+const App = () => {
+  const {loading} = useApp()
+  if(loading){
+    return <Spin fullscreen/>
+  }
+  return(
   <>
     
 
     <Layout style={layoutStyle}>
-      <Sider width="25%" style={siderStyle}>
-        Sider
-      </Sider>
+     
       <Layout>
         <Header style={headerStyle}>Header</Header>
         <Content style={contentStyle}>
@@ -54,5 +58,6 @@ const App = () => (
       </Layout>
     </Layout>
   </>
-);
+  )
+};
 export default App
