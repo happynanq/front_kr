@@ -38,16 +38,13 @@ export function AppContextProvider({children}){
       return new Promise(res=>{
         setTimeout(()=>{
           res(fakeFetchData)
-        }, 4000)
+        }, 1000)
       })
     }
     async function preload() {
       setLoading(true)
 
-      const as = await fakeFetch()
-      
-      setAsset(as)
-      console.log("ASSET AS ", as)
+      await prom()
       setModalLoad(false)
       setLoading(false)
 

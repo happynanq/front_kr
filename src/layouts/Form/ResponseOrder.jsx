@@ -1,48 +1,55 @@
 import { Space, Divider , Typography, Button } from "antd";
 import { useOrder } from "../../context/order-context"
 import { useApp } from "../../context/app-context";
+import { useEffect } from "react";
 
 export default function ResponseOrder({fetchRes, setModal}){ 
   const {asset} = useApp()
-  console.log("fetchRes", asset);
+  useEffect(()=>{
+    console.log("fetchRes", asset);
+
+  })
   function onSendReq(){
     // some async 
     
     setModal(false)
   }
-  if(Object.keys(asset) == 0){
-    return <></>
-}
+//   if(Object.keys(asset) == 0){
+//     return <></>
+// }
   return (
     <>
-      <Space>
+      <Typography>
         <Typography.Text>
-          smeta: {asset.smeta}
+        <Typography.Title level={5} > Смета: </Typography.Title>  <Typography.Text type='success'>{asset.smeta}</Typography.Text> ₽
         </Typography.Text>
-      </Space>
+      </Typography>
       <Divider/> 
-      <Space>
+
+      <Typography>
         <Typography.Text>
-          DRONE: {asset.drone_model.map((a, i)=><div key={i}><Typography.Text>{a.name}, {a.cnt}, {a.price_one} $</Typography.Text></div> )}
+        <Typography.Title level={5} >Дроны: </Typography.Title> {asset.drone_model.map((a, i)=><div key={i}> <Typography.Text strong > {a.name} </Typography.Text> , {a.cnt} шт, {a.price_one} ₽</div> )}
         </Typography.Text>
-      </Space>
+      </Typography>
       <Divider/> 
-      <Space>
+      <Typography>
         <Typography.Text>
-        DRONE: {asset.additional.map((a, i)=><div><Typography.Text>{a.name}, {a.cnt}, {a.price_one} $</Typography.Text></div> )}
+        <Typography.Title level={5} >Комплектующие:</Typography.Title> {asset.additional.map((a, i)=><div key={i}><Typography.Text strong>{a.name} </Typography.Text>, {a.cnt} шт, {a.price_one} ₽</div> )}
 
         </Typography.Text>
-      </Space>
+      </Typography>
+      <Typography/> 
       <Divider/> 
-      <Space>
+
+      <Typography>
         <Typography.Text>
-          recomendation: {asset.recommendation}
+        <Typography.Title level={5} >Рекомендация: </Typography.Title> {asset.recomendation}
         </Typography.Text>
-      </Space>
+      </Typography>
       <Divider/>
-      <Button type="primary" onClick={onSendReq}>
+      {/* <Button type="primary" onClick={onSendReq}>
         Отправить заказ
-      </Button>
+      </Button> */}
     </>
     
   )

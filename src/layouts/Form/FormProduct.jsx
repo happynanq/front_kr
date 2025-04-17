@@ -50,6 +50,16 @@ const tailFormItemLayout = {
     },
   },
 };
+
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = (error) => reject(error);
+  });
+};
+
 const FormProduct = () => {
   const [form] = Form.useForm();
   const [modal, setModal] = useState(false)
@@ -59,15 +69,20 @@ const FormProduct = () => {
 
   const onFinish = (values) => {
     console.log("Received values of form: ", values);
-    let ord = {
-      ...values, 
-      file_name:values.dragger.map(e=>e.name), 
-      drag_file: ["bytes", "bytes"] //!!!!
+    // let x = Object.keys
+    // let fls = values.dragger
+    if(Object.keys(values) != 0){
+      let ord = {
+        ...values, 
+        file_name:values.dragger?.map(e=>e.name), 
+        drag_file: values.dragger?.map(async (e)=>fileToBase64(e.originFileObj)) //!!!!
+      }
+      delete ord.agreement
+      delete ord.dragger
+      setOrder(()=>ord)
+      setModal(()=>true)
     }
-    delete ord.agreement
-    delete ord.dragger
-    setOrder(()=>ord)
-    setModal(()=>true)
+    
     
 
     async function prom() {
@@ -123,7 +138,7 @@ const FormProduct = () => {
   return (
     <>
     <div style={{ height: '100%', overflowY: 'auto' }}>
-      <Form layout="vertical" 
+      <Form layout="vertical"
       {...formItemLayout}
       form={form}
       name="register"
@@ -131,11 +146,15 @@ const FormProduct = () => {
       
       // layout="vertical"
       // scrollToFirstError
+      style={{
+        padding:"5% 10% "
+      }}
       
       >
       <Form.Item
         name="name"
         label="Имя"
+        rules = {[{required:true, message:"Это поле должно быть заполнено!"}]}
         // ! rules = {[{required:true, message:"Это поле должно быть заполнено!"}]}
         // tooltip="Ваше имя необходимо для заполнения заявки"
         // rules={[{ required: true, message: 'Please input your nickname!', whitespace: true }]}
@@ -145,8 +164,14 @@ const FormProduct = () => {
 
       <Form.Item
         name="phone"
-        label="Phone Number"
+        label="Номер телефона"
         // ! rules={[{ required:   true, message: "Please input your phone number!" }]}
+        rules={[{ required:   true, message: "Введите ваш номер телефона!" },
+          {
+            pattern: /^\+?[0-9]{10,15}$/,
+            message: 'Пожалуйста, введите корректный номер телефона',
+          },
+        ]}
         >
         <Input  style={{ width: "100%" }} />
       </Form.Item>
@@ -154,16 +179,16 @@ const FormProduct = () => {
       <Form.Item
         name="email"
         label="E-mail"
-        // rules={[
-        //   {
-        //     type: "email",
-        //     message: "The input is not valid E-mail!",
-        //   },
-        //   {
-        //     required: true,
-        //     message: "Please input your E-mail!",
-        //   },
-        // ]}
+        rules={[
+          {
+            type: "email",
+            message: "Вы ввели неверный E-mail",
+          },
+          {
+            required: true,
+            message: "Введите ваш E-mail",
+          },
+        ]}
       >
         <Input />
       </Form.Item>
@@ -173,7 +198,7 @@ const FormProduct = () => {
         label="Для каких задач вам нужен дрон?"
         // rules={[{ required: true, message: "Please input Intro" }]}
       >
-        <Input.TextArea showCount  />
+        <Input.TextArea />
       </Form.Item>
 
       <Form.Item
@@ -181,7 +206,7 @@ const FormProduct = () => {
         label="Планируемые локации использования дрона?"
         // rules={[{ required: true, message: "Please input Intro" }]}
       >
-        <Input.TextArea showCount  />
+        <Input.TextArea />
       </Form.Item>
 
 
@@ -190,7 +215,7 @@ const FormProduct = () => {
         label="Вас интересует работа в реальном времени или вас интересует запись какой-то информации?"
         // rules={[{ required: true, message: "Please input Intro" }]}
       >
-        <Input.TextArea showCount  />
+        <Input.TextArea />
       </Form.Item>
 
       <Form.Item
@@ -198,9 +223,24 @@ const FormProduct = () => {
         label="Какие характеристики для вас важны: время полёта, дальность, грузоподъёмность, тип камеры?"
         // rules={[{ required: true, message: "Please input Intro" }]}
       >
-        <Input.TextArea showCount  />
+        <Input.TextArea />
       </Form.Item>
 
+
+      
+
+
+      <Form.Item label="Вставьте файлы">
+        <Form.Item name="dragger" valuePropName="fileList" getValueFromEvent={normFile} noStyle>
+          <Upload.Dragger name="files" beforeUpload={() => false} multiple={true}>
+            <p className="ant-upload-drag-icon">
+              <InboxOutlined />
+            </p>
+            <p className="ant-upload-text">Нажмите или перетащите файлы для загрузки</p>
+            {/* <p className="ant-upload-hint">Support for a single or bulk upload.</p> */}
+          </Upload.Dragger>
+        </Form.Item>
+      </Form.Item>
 
       <Form.Item
         name="agreement"
@@ -208,37 +248,23 @@ const FormProduct = () => {
         rules={[
           {
             validator: (_, value) =>
-              // value
-              true
+              value
                 ? Promise.resolve()
-                : Promise.reject(new Error("Should accept agreement")),
+                : Promise.reject(new Error("Необходимо ваше соглашение")),
           },
         ]}
-        {...tailFormItemLayout}
+        // {...tailFormItemLayout}
       >
         <Checkbox>
         Принимаю условия  
-          <Button color="primary" variant="link" onClick = {()=>{setModalAgree(true)}}>
+          <Button style={{margin:0, padding:3}}color="primary" variant="link" onClick = {()=>{setModalAgree(true)}}>
           Соглашения
           </Button>
           на обработку персональных данных 
         </Checkbox>
       </Form.Item>
 
-
-      <Form.Item label="Dragger">
-        <Form.Item name="dragger" valuePropName="fileList" getValueFromEvent={normFile} noStyle>
-          <Upload.Dragger name="files" action="/upload.do">
-            <p className="ant-upload-drag-icon">
-              <InboxOutlined />
-            </p>
-            <p className="ant-upload-text">Click or drag file to this area to upload</p>
-            <p className="ant-upload-hint">Support for a single or bulk upload.</p>
-          </Upload.Dragger>
-        </Form.Item>
-      </Form.Item>
-
-      <Form.Item {...tailFormItemLayout}>
+      <Form.Item >
         <Button type="primary" htmlType="submit">
           Отправить заказ
         </Button>

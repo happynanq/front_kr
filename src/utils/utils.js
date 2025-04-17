@@ -27,5 +27,5 @@ export const fakeFetchData = {
           "price_one": 100
       }
   ],
-  "recommendation": "prompt.prompt"
+  "recomendation": "prompt.prompt"
 }
